@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graph/graph.h"
+
 #include <vector>
 
 using node_name_t = unsigned int;
