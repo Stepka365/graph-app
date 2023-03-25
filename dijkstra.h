@@ -10,10 +10,13 @@ struct Vertex {
     bool visited = false;
 };
 
-using route_t = std::vector<node_name_t>;
-
 std::pair<weight_t, route_t> dijkstra(const graph_t& graph, node_name_t key_from, node_name_t key_to);
 
-void preprocessing(const node_name_t& key, size_t size);
+void preprocessing(size_t size, node_name_t key_from, node_name_t key_to);
+
+void edges_record(const std::pair<node_name_t, weight_t>& elem,
+                  std::vector<Vertex>& vertices, node_name_t chosen);
+
+node_name_t choose_best_vertex(const graph_t& graph, std::vector<Vertex>& vertices);
 
 route_t make_route(const std::vector<Vertex>& vertices, node_name_t key_from, node_name_t key_to);

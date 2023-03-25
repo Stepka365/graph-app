@@ -2,36 +2,47 @@
 
 
 std::pair<weight_t, route_t> dijkstra(const graph_t& graph, node_name_t key_from, node_name_t key_to) {
-    preprocessing(key_from, graph.size());
-    preprocessing(key_to, graph.size());
+    preprocessing(graph.size(), key_from, key_to);
     std::vector<Vertex> vertices(graph.size());
     vertices[key_from].sum_to_this = 0;
     node_name_t chosen = key_from;
-    auto edges_check = [&vertices, &chosen](std::pair<node_name_t, weight_t> it) {
-        if (it.second < 0) { throw std::runtime_error("Dijkstra :: incorrect graph :: weight < 0"); }
-        Vertex& vertex_to = vertices[it.first];
-        if (!vertex_to.visited && vertices[chosen].sum_to_this + it.second < vertex_to.sum_to_this) {
-            vertex_to.sum_to_this = vertices[chosen].sum_to_this + it.second;
-            vertex_to.prev = chosen;
-        }
-    };
     for (node_name_t i = 0; i < graph.size(); ++i) {
-        auto cur_node = graph.find(chosen)->second;
-        std::for_each(cur_node.begin(), cur_node.end(), edges_check);
-        vertices[chosen].visited = true;
-        weight_t min = std::numeric_limits<weight_t>::infinity();
-        for (size_t j = 0; j < graph.size(); ++j) {
-            if (!vertices[j].visited && vertices[j].sum_to_this < min) {
-                min = vertices[j].sum_to_this;
-                chosen = j;
-            }
+        for (const auto& elem: graph.find(chosen)->second) {
+            edges_record(elem, vertices, chosen);
         }
+        vertices[chosen].visited = true;
+        chosen = choose_best_vertex(graph, vertices);
     }
-    return std::pair<weight_t, route_t>{vertices[key_to].sum_to_this, make_route(vertices, key_from, key_to)};
+    return std::pair<weight_t, route_t>{vertices[key_to].sum_to_this,
+                                        make_route(vertices, key_from, key_to)};
 }
 
-void preprocessing(const node_name_t& key, size_t size) {
-    if (key < 0 || key >= size) { throw std::runtime_error("Dijkstra :: key is incorrect"); }
+void preprocessing(size_t size, node_name_t key_from, node_name_t key_to) {
+    if (key_from >= size) { throw std::runtime_error("Dijkstra :: key_from is incorrect"); }
+    if (key_to >= size) { throw std::runtime_error("Dijkstra :: key_to is incorrect"); }
+    if (key_from == key_to) { throw std::runtime_error("route: There is the only vertex\nweight: 0"); }
+}
+
+void edges_record(const std::pair<node_name_t, weight_t>& elem,
+                  std::vector<Vertex>& vertices, node_name_t chosen) {
+    if (elem.second < 0) { throw std::runtime_error("Dijkstra :: incorrect graph :: weight < 0"); }
+    Vertex& vertex_to = vertices[elem.first];
+    if (!vertex_to.visited && vertices[chosen].sum_to_this + elem.second < vertex_to.sum_to_this) {
+        vertex_to.sum_to_this = vertices[chosen].sum_to_this + elem.second;
+        vertex_to.prev = chosen;
+    }
+}
+
+node_name_t choose_best_vertex(const graph_t& graph, std::vector<Vertex>& vertices) {
+    node_name_t chosen;
+    weight_t min = std::numeric_limits<weight_t>::infinity();
+    for (size_t i = 0; i < graph.size(); ++i) {
+        if (!vertices[i].visited && vertices[i].sum_to_this < min) {
+            min = vertices[i].sum_to_this;
+            chosen = i;
+        }
+    }
+    return chosen;
 }
 
 route_t make_route(const std::vector<Vertex>& vertices, node_name_t key_from, node_name_t key_to) {

@@ -21,7 +21,7 @@ node_name_t make_node_name(const char* from) {
     std::stringstream sstr;
     sstr << from;
     size_t name;
-    if (!(sstr >> name)) {
+    if (!(sstr >> name && sstr.eof())) {
         throw std::runtime_error("Invalid argument: "s + from);
     }
     return name;
