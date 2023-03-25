@@ -4,7 +4,6 @@ graph_t read_graph(const char* file_name) {
     std::fstream file(file_name);
     if (!file.is_open()) { throw std::runtime_error("read_graph :: Impossible to open file"); }
     graph_t graph = read_first_line(file);
-
     for (size_t i = 1; i < graph.size(); ++i) {
         read_line(file, graph, i);
     }
